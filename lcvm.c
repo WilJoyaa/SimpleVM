@@ -1,4 +1,15 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <signal.h>
+/* unix only */
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/termios.h>
+#include <sys/mman.h>
+
 
 
 // Registers 
@@ -39,6 +50,15 @@ enum
 	OP_RES,
 	OP_LEA,
 	OP_TRAP
+};
+
+
+// Condition Flags
+enum
+{
+	FL_POS = 1 << 0,
+	FL_ZRO = 1 << 1,
+	FL_NEG = 1 << 2
 };
 
 
