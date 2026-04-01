@@ -75,7 +75,7 @@ uint16_t sign_extend (uint16_t x, int bit_count){
 }
 
 
-void update_flags (uint16_t){
+void update_flags (uint16_t r){
 	if (reg[r] == 0) {reg[R_COND] = FL_ZRO;} 
 	else if (reg[r] >> 15) {reg[R_COND] = FL_NEG;} 
 	else {reg[R_COND] = FL_POS;}
@@ -128,16 +128,36 @@ int main(int argc, const char* argv[]){
 				update_flags(r0);
 				break;
 
+
 			case OP_AND:
-				@{AND}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t r1 = (instr >> 6) & 0x7;
+				uint16_t imm_flag = (instr >> 5) & 0x1;
+
+
+				if (imm_flag){
+					uint16_t imm5 = sign_extend(instr & 0x1F, 5);
+					reg[r0] = reg[r1] && imm5;
+				} else { 
+					uint16_t r2 = instr & 0x7;
+					reg[r0] = reg[r1] && reg[r2];
+				}
+				update_flags (r0);
 				break;
 
 			case OP_NOT:
-				@{NOT}
+				
 				break;
 			
 			case OP_BR:
-				@{BR}
+				uint16_t r0 = (instr >> 11) & 0x7;
+				uint16_t r1 = (instr >> 10) & 0x7;
+				uint16_t r2 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9); 
+
+				if ((r0 && FL_NEG) | (r1 && FL_ZRO) | (r2 && FL_POS)){
+					reg[R_PC] = reg[R_PC] + pc_offset;
+				}
 				break;
 			
 			case OP_JMP:
@@ -149,15 +169,28 @@ int main(int argc, const char* argv[]){
 				break;
 
 			case OP_LD:
-				@{LD}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+
+				reg[r0] = mem_read(reg[R_PC] + pc_offset);
+				update_flags(r0);
 				break;
 
 			case OP_LDI:
-				@{LDI}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9); 
+				
+				reg[r0] = mem_read(mem_read(reg[R_PC] + pc_offset));
+				update_flags(r0);
 				break;
 
 			case OP_LDR:
-				@{LDR}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t r1 = (instr >> 6) & 0x7; 
+				uint16_t offset6 = sign_extend(instr & 0x1FF, 6);
+
+				reg[r0] = mem_read(reg[r1] + offset6);
+				update_flags(r0);
 				break;
 
 			case OP_LEA:
