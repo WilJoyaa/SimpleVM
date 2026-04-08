@@ -146,7 +146,7 @@ int main(int argc, const char* argv[]){
 				break;
 
 			case OP_NOT:
-				
+				@{NOT}
 				break;
 			
 			case OP_BR:
@@ -194,23 +194,43 @@ int main(int argc, const char* argv[]){
 				break;
 
 			case OP_LEA:
-				@{LEA}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+
+				reg[r0] = reg[R_PC] + pc_offset;
+				update_flags(r0);
 				break;
 
 			case OP_ST:
-				@{ST}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+				uint16_t memLoc = mem_read(reg[R_PC] + pc_offset);
+				
+				memLoc = reg[r0];
 				break;
 
 			case OP_STI:
-				@{STI}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+				uint16_t memLoc = mem_read(mem_read(reg[R_PC] + pc_offset));
+
+				memLoc = reg[r0];
 				break;
 
 			case OP_STR:
-				@{STR}
+				uint16_t r0 = (instr >> 9) & 0x7;
+				uint16_t r1 = (instr >> 6) & 0x7;
+				uint16_t offset6 = sign_extend(instr & 0x1FF, 6);
+				uint16_t memLoc = mem_read(r1 + offset6);
+
+				memLoc = r0;
 				break;
 
 			case OP_TRAP:
-				@{TRAP}
+				uint16_t trapvect8 = sign_extend(instr & 0x1FF, 9);
+				
+				reg[R_R7] = reg[R_PC];
+
 				break;
 
 			case OP_RES:
