@@ -61,6 +61,16 @@ enum
 	OP_TRAP
 };
 
+enum
+{
+	TRAP_GETC = 0x20,
+	TRAP_OUT = 0x21,
+	TRAP_PUTS = 0x22,
+	TRAP_IN = 0x23,
+	TRAP_PUTSP = 0x24,
+	TRAP_HALT = 0x25
+};
+
 
 // Defining Memory
 #define MEMORY_MAX (1 << 16)
@@ -237,10 +247,34 @@ int main(int argc, const char* argv[]){
 				break;
 
 			case OP_TRAP:
-				uint16_t trapvect8 = sign_extend(instr & 0x1FF, 9);
-				
 				reg[R_R7] = reg[R_PC];
 
+				switch(instr & 0xFF){
+					case TRAP_GETC:
+						@{TRAP_GETC}
+						break;
+
+					case TRAP_OUT:
+						@{TRAP_OUT}
+						break;
+					
+					case TRAP_PUTS:
+						@{TRAP_PUTS}
+						break;
+
+					case TRAP_IN:
+						@{TRAP_IN}
+						break;
+
+					case TRAP_PUTSP:
+						@{TRAP PUTSP}
+						break;
+
+					case TRAP_HALT:
+						@{TRAP HALT}
+						break;
+				}
+					
 				break;
 
 			case OP_RES:
